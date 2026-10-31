@@ -2,16 +2,16 @@ package models;
 
 import java.util.Random;
 
-public class Players {
+public class Player {
     private final String name;
-    private final Positions position;
+    private final Position position;
     private int pace;
     private int passing;
     private int shooting;
     private int defending;
     private int stamina;
 
-    public Players(String name, Positions position, int pace, int passing, int shooting, int defending, int stamina) {
+    public Player(String name, Position position, int pace, int passing, int shooting, int defending, int stamina) {
         this.name = name;
         this.position = position;
         this.pace = clamps(pace);
@@ -25,7 +25,7 @@ public class Players {
         return Math.clamp(x, 1, 99);
     }
 
-    public static Players randomPlayer(String pName, Positions pos,int level){
+    public static Player randomPlayer(String pName, Position pos, int level){
         Random rand = new Random((pName+pos).hashCode());
         level = Math.max(1, Math.min(5, level));
         int base = 40 + level * 10;
@@ -47,14 +47,14 @@ public class Players {
             defending=cap(defending,40,5,rand);
             pass=cap(pass,70,5,rand);
             shooting+=8;
-        }else if(pos==Positions.GK){
+        }else if(pos== Position.GK){
             defending+=8;
             shooting=cap(shooting,50,5,rand);
             pass=cap(pass,70,5,rand);
 
         }
 
-        return new Players(pName,pos,clamps(pace),clamps(pass),clamps(shooting),clamps(defending),clamps(stamina));
+        return new Player(pName,pos,clamps(pace),clamps(pass),clamps(shooting),clamps(defending),clamps(stamina));
     }
 
     private static int cap(int value, int max, int spread, Random rand) {
@@ -114,7 +114,7 @@ public class Players {
         return name;
     }
 
-    public Positions getPosition() {
+    public Position getPosition() {
         return position;
     }
 

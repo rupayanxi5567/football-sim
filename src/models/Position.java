@@ -1,6 +1,6 @@
 package models;
 
-public enum Positions {
+public enum Position {
     GK, CB, LB,RB,LWB,RWB,CMF,DMF,AMF,LMF,RMF,LWF,RWF,SS,CF;
 
     public boolean isForward(){
