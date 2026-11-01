@@ -22,6 +22,7 @@ public class Formation {
     public static final Formation F_4321 = new Formation(4,3,2,1);
     public static final Formation F_3421 = new Formation(3,4,2,1);
     public static final Formation F_3412 = new Formation(3,4,1,2);
+    public static final Formation F_4231 = new Formation(4,2,3,1);
 
 
 

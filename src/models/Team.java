@@ -22,11 +22,10 @@ public class Team {
 
     public List<Player> getStartingEleven(){
         List<Player> xiPlayers = new ArrayList<>();
-        xiPlayers.addAll(best(Position::isForward,formation.getForwards()));
-//        xiPlayers.addAll(best(Position::isMidFielder,formation.getAttackingMidfielders() + formation.getMidfielders()));
-        xiPlayers.addAll(getStartingMidfielders());
-        xiPlayers.addAll(best(Position::isDefender,formation.getDefenders()));
         xiPlayers.addAll(best(Position::isGoalkeeper,1));
+        xiPlayers.addAll(best(Position::isDefender,formation.getDefenders()));
+        xiPlayers.addAll(getStartingMidfielders());
+        xiPlayers.addAll(best(Position::isForward,formation.getForwards()));
         return xiPlayers;
     }
 
