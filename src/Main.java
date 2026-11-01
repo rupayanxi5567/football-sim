@@ -1,15 +1,20 @@
-import models.Player;
-import models.Position;
+import models.*;
 
 public class Main {
     public static void main(String[] args) {
-        Player Mbappe = new Player("Kyllian Mbappe", Position.CF,906,50,95,60,90);
-        System.out.println(Mbappe.getRatingsText());
+        Team a = Team.random("FC BARCELONA", 3);
 
-        Player MikheilAkhonozov = Player.randomPlayer("Mikheil Akhonozov", Position.CF,1);
-        System.out.println(MikheilAkhonozov.getRatingsText());
+        System.out.println(a.getLineupText());
+        System.out.println();
 
-        Player SunilChetri = Player.randomPlayer("Sunil Chetri", Position.CF,4);
-        System.out.println(SunilChetri.getRatingsText());
+        System.out.println("****************************************");
+
+        a.setFormation(Formation.F_3412);
+        System.out.println(a.getLineupText());
+
+        System.out.println("****************************************");
+
+        a.setFormation(Formation.F_4321);
+        System.out.println(a.getLineupText());
     }
 }

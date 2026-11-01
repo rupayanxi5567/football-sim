@@ -89,17 +89,6 @@ public class Player {
     }
 
 // ****************************************************** getter setter below ******************************************************
-// ****************************************************** getter setter below ******************************************************
-// ****************************************************** getter setter below ******************************************************
-
-
-
-
-
-
-
-
-
 
     public int getDefending() { return defending; }
     public void setDefending(int defending) { this.defending = clamps(defending); }

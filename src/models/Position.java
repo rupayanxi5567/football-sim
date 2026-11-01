@@ -8,10 +8,18 @@ public enum Position {
     }
 
     public boolean isMidFielder(){
-        return this == AMF || this == CMF || this == DMF || this == LMF || this == RMF;
+        return this == CMF || this == DMF || this == LMF || this == RMF;
+    }
+
+    public boolean isAttackingMidFielder(){
+        return this == AMF;
     }
 
     public boolean isDefender(){
         return this == CB || this == LB || this == RB || this == LWB || this == RWB;
+    }
+
+    public boolean isGoalkeeper() {
+        return this == GK;
     }
 }
