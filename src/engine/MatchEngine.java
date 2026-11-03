@@ -3,6 +3,7 @@ package engine;
 import models.Player;
 import models.Team;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -22,12 +23,12 @@ public class MatchEngine {
     private static final double PENALTY_DIVISOR = 400.0;
     private static final double HOME_ADVANTAGE = 0.04;
     private static final double RATING_DIVISOR = 400.0;
+    private static final double SHOOTER_POWER = 3.0;
+    private static final double SHOOTER_DIVISOR = 150.0;
+    private static final double ASSIST_CHANCE = 0.75;
 
-//    private static final double ATTACK_RATE = 0.22;
-//    private static final double EXTRA_TIME_ATTACK_RATE = 0.15;
-//    private static final double BASE_GOAL_CHANCE = 0.12;
-//    private static final double MIN_GOAL_CHANCE = 0.03;
-//    private static final double MAX_GOAL_CHANCE = 0.40;
+    private final List<Player> homeXI, awayXI;
+    private final double homeShootRef, awayShootRef;
 
     private final int homeAttack, homeMid, homeDef;
     private final int awayAttack, awayMid, awayDef;
@@ -46,25 +47,27 @@ public class MatchEngine {
     private int homeOnTarget, awayOnTarget;
     private int homePossessionMinutes, awayPossessionMinutes;
 
-    private Team homeTeam;
-    private Team awayTeam;
+    private final Team homeTeam;
+    private final Team awayTeam;
     private int homeGoals = 0;
     private int awayGoals = 0;
     private int homePenaltyScore = 0;
     private int awayPenaltyScore = 0;
     private Team winner;
-    private static final double PENALTY_POSSIBILITY = 0.75;
     private final Random rand;
     private boolean verbose = true;
+    private final List<MatchEvent> matchEvents = new ArrayList<>();
+
+    private void record(int minute, String label, EventType type, Team team, Player player, Player second, int hs, int as) {
+        MatchEvent e = new MatchEvent(minute, type, team, player, label, hs, as, second);
+        matchEvents.add(e);
+        if (verbose) {
+            System.out.println(Commentary.describe(e));
+        }
+    }
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
-    }
-
-    private void log(String text) {
-        if (verbose) {
-            System.out.println(text);
-        }
     }
 
     public MatchEngine(Team homeTeam, Team awayTeam) {
@@ -91,6 +94,11 @@ public class MatchEngine {
         this.awayGk = awayTeam.getGoalKeeperRating();
         this.homePenaltyTakers = homeTeam.getPenaltyTakers();
         this.awayPenaltyTakers = awayTeam.getPenaltyTakers();
+
+        this.homeXI = homeTeam.getStartingEleven();
+        this.awayXI = awayTeam.getStartingEleven();
+        this.homeShootRef = expectedShooting(homeXI);
+        this.awayShootRef = expectedShooting(awayXI);
     }
 
     private double fatigue(int avgStamina, int minutes){
@@ -98,79 +106,125 @@ public class MatchEngine {
         return 1.0 - FATIGUE_STRENGTH * (minutes / 90.0) * tiredness;
     }
 
-    public void playMinute(int minute, String label){
-        double homeMidNow = homeMid * fatigue(homeStamina,minute);
-        double awayMidNow = awayMid * fatigue(awayStamina,minute);
+    private void playMinute(int minute, String label) {
+        double homeMidNow = homeMid * fatigue(homeStamina, minute);
+        double awayMidNow = awayMid * fatigue(awayStamina, minute);
 
-        if(POSSESSION_RESET_CHANCE > rand.nextDouble()){
-            homeHasBall = rand.nextDouble() < (homeMidNow / (homeMidNow+awayMidNow));
+        if (POSSESSION_RESET_CHANCE > rand.nextDouble()) {
+            homeHasBall = rand.nextDouble() < (homeMidNow / (homeMidNow + awayMidNow));
         }
 
-        if(homeHasBall){
+        if (homeHasBall) {
             homePossessionMinutes++;
-        }else{
+        } else {
             awayPossessionMinutes++;
         }
 
         Team attacker = homeHasBall ? homeTeam : awayTeam;
-        double attackFatigue = fatigue(homeHasBall ? homeStamina : awayStamina,minute);
-        double defendFatigue = fatigue(homeHasBall ? awayStamina : homeStamina,minute);
+        double attackFatigue = fatigue(homeHasBall ? homeStamina : awayStamina, minute);
+        double defendFatigue = fatigue(homeHasBall ? awayStamina : homeStamina, minute);
 
-        double shotRate = ((minute>90) ? SHOT_RATE * EXTRA_TIME_FACTOR : SHOT_RATE);
+        double shotRate = (minute > 90) ? SHOT_RATE * EXTRA_TIME_FACTOR : SHOT_RATE;
         shotRate = shotRate * attackFatigue;
-        if(rand.nextDouble() > shotRate){
+        if (rand.nextDouble() > shotRate) {
             return;
         }
 
         double attackerPower = (homeHasBall ? homeAttack + homeMid : awayAttack + awayMid) * attackFatigue;
         double defenderPower = (homeHasBall ? awayMid + awayDef : homeMid + homeDef) * defendFatigue;
         int keeper = homeHasBall ? awayGk : homeGk;
-        int attackerAttack = homeHasBall ? homeAttack : awayAttack;
 
-        if(homeHasBall){
+        if (homeHasBall) {
             homeShots++;
-        }else{
+        } else {
             awayShots++;
         }
 
-        double onTarget = BASE_ON_TARGET + (attackerPower - defenderPower) / RATING_DIVISOR;
-        if(homeHasBall){
+        List<Player> xi = homeHasBall ? homeXI : awayXI;
+        Player shooter = pickPlayer(xi, null, false);
+        double ref = homeHasBall ? homeShootRef : awayShootRef;
+
+        double onTarget = BASE_ON_TARGET
+                + (attackerPower - defenderPower) / RATING_DIVISOR
+                + (shooter.getShooting() - ref) / SHOOTER_DIVISOR;
+        if (homeHasBall) {
             onTarget = onTarget + HOME_ADVANTAGE;
         }
-        onTarget = Math.clamp(onTarget,MIN_ON_TARGET,MAX_ON_TARGET);
-        if(rand.nextDouble() > onTarget){
-            log(label + "' shot off target (" + attacker.getName() + ")");
+        onTarget = Math.clamp(onTarget, MIN_ON_TARGET, MAX_ON_TARGET);
+        if (rand.nextDouble() > onTarget) {
+            record(minute, label, EventType.SHOT_MISSED, attacker, shooter, null, homeGoals, awayGoals);
             return;
         }
 
-        if(homeHasBall){
+        if (homeHasBall) {
             homeOnTarget++;
-        }else{
+        } else {
             awayOnTarget++;
         }
 
-        double save = BASE_SAVE + (keeper - attackerAttack) / GK_DIVISOR;
-        save = Math.clamp(save,MIN_SAVE,MAX_SAVE);
-        if(save > rand.nextDouble()){
-            log(label + "' saved by the keeper");
+        double save = BASE_SAVE + (keeper - shooter.getShooting()) / GK_DIVISOR;
+        save = Math.clamp(save, MIN_SAVE, MAX_SAVE);
+        if (save > rand.nextDouble()) {
+            record(minute, label, EventType.SHOT_SAVED, attacker, shooter, null, homeGoals, awayGoals);
             return;
         }
 
-        if(homeHasBall){
+        if (homeHasBall) {
             homeGoals++;
-        }else{
+        } else {
             awayGoals++;
         }
-        log(label + "' GOAL! " + attacker.getName() + " (" + homeGoals + "-" + awayGoals + ")");
+        Player assister = (rand.nextDouble() < ASSIST_CHANCE) ? pickPlayer(xi, shooter, true) : null;
+        record(minute, label, EventType.GOAL, attacker, shooter, assister, homeGoals, awayGoals);
+    }
+
+    private double shooterWeight(Player p) {
+        return p.getPosition().attackWeight() * Math.pow(p.getShooting() / 100.0, SHOOTER_POWER);
+    }
+
+    private double assistWeight(Player p) {
+        return (0.2 + p.getPosition().attackWeight()) * Math.pow(p.getPassing() / 100.0, 2);
+    }
+
+    private Player pickPlayer(List<Player> xi, Player exclude, boolean forAssist) {
+        double[] w = new double[xi.size()];
+        double total = 0;
+        for (int i = 0; i < xi.size(); i++) {
+            Player p = xi.get(i);
+            if (p == exclude || p.getPosition().isGoalkeeper()) continue;
+            w[i] = forAssist ? assistWeight(p) : shooterWeight(p);
+            total += w[i];
+        }
+        double r = rand.nextDouble() * total;
+        int last = -1;
+        for (int i = 0; i < xi.size(); i++) {
+            if (w[i] > 0) {
+                last = i;
+                r -= w[i];
+                if (r <= 0) return xi.get(i);
+            }
+        }
+        return xi.get(last);
+    }
+
+    private double expectedShooting(List<Player> xi) {
+        double total = 0, weighted = 0;
+        for (Player p : xi) {
+            double w = shooterWeight(p);
+            total += w;
+            weighted += w * p.getShooting();
+        }
+        return total == 0 ? 0 : weighted / total;
     }
 
     public void play() {
         boolean firstKickOffHome = homeHasBall;
-        playPeriod(1,45,5);
-        log("HALF-TIME");
+        record(0, "0", EventType.KICKOFF, null, null, null, 0, 0);
+        playPeriod(1, 45, 5);
+        record(45, "45", EventType.HALF_TIME, null, null, null, homeGoals, awayGoals);
         homeHasBall = !firstKickOffHome;
-        playPeriod(46,90,5);
-        log("FULL-TIME");
+        playPeriod(46, 90, 5);
+        record(90, "90", EventType.FULL_TIME, null, null, null, homeGoals, awayGoals);
     }
 
     private void playPeriod(int start, int end, int maxAdded) {
@@ -184,81 +238,78 @@ public class MatchEngine {
     }
 
     public void result() {
+        String how = "";
         if (homeGoals > awayGoals) {
-            log(homeTeam.getName() + " won");
             winner = homeTeam;
         } else if (homeGoals < awayGoals) {
-            log(awayTeam.getName() + " won");
             winner = awayTeam;
         } else {
             extraTime();
-            if (homeGoals == awayGoals) {
-                penalty();
-                if (homePenaltyScore > awayPenaltyScore) {
-                    log(homeTeam.getName() + " won in Penalty");
-                    winner = homeTeam;
-                } else if (homePenaltyScore < awayPenaltyScore) {
-                    log(awayTeam.getName() + " won in Penalty");
-                    winner = awayTeam;
-                } else {
-                    if (suddenDeath() == homeTeam) {
-                        log(homeTeam.getName() + " won in Sudden Death");
-                        winner = homeTeam;
-                    } else {
-                        log(awayTeam.getName() + " won in Sudden Death");
-                        winner = awayTeam;
-                    }
-                }
+            if (homeGoals != awayGoals) {
+                winner = (homeGoals > awayGoals) ? homeTeam : awayTeam;
+                how = "after extra time";
             } else {
-                if (homeGoals > awayGoals) {
-                    log(homeTeam.getName() + " won in Extra Time");
-                    winner = homeTeam;
-                } else if (homeGoals < awayGoals) {
-                    log(awayTeam.getName() + " won in Extra Time");
-                    winner = awayTeam;
+                penalty();
+                if (homePenaltyScore != awayPenaltyScore) {
+                    winner = (homePenaltyScore > awayPenaltyScore) ? homeTeam : awayTeam;
+                    how = "on penalties";
+                } else {
+                    winner = suddenDeath();
+                    how = "in sudden death";
                 }
             }
         }
+        record(how.isEmpty() ? 90 : 120, how, EventType.WINNER, winner, null, null,
+                homeGoals, awayGoals);
     }
 
     private void extraTime() {
-        playPeriod(91,105,2);
-        log("HALF-TIME OF EXTRA TIME");
-        playPeriod(106,120,2);
-        log("FULL-TIME OF EXTRA TIME");
+        record(90, "90", EventType.EXTRA_TIME_START, null, null, null, homeGoals, awayGoals);
+        playPeriod(91, 105, 2);
+        record(105, "105", EventType.EXTRA_TIME_HALF, null, null, null, homeGoals, awayGoals);
+        playPeriod(106, 120, 2);
+        record(120, "120", EventType.EXTRA_TIME_END, null, null, null, homeGoals, awayGoals);
     }
 
-    private boolean takeKick(Team team,int teamKickIndex) {
-        boolean isHome = (team == homeTeam);
+    private boolean takeKick(boolean isHome, int teamKickIndex) {
+        Team team = isHome ? homeTeam : awayTeam;
         List<Player> takers = isHome ? homePenaltyTakers : awayPenaltyTakers;
         Player kicker = takers.get(teamKickIndex % takers.size());
         int keeper = isHome ? awayGk : homeGk;
 
-        double chance = PENALTY_BASE + (kicker.getShooting() - keeper)/PENALTY_DIVISOR;
-        chance = Math.clamp(chance,0.50,0.92);
-
+        double chance = PENALTY_BASE + (kicker.getShooting() - keeper) / PENALTY_DIVISOR;
+        chance = Math.clamp(chance, 0.50, 0.92);
         boolean scored = chance > rand.nextDouble();
-        log(kicker.getName() + (scored ? " Scores a Goal !!!" : "Misses the Goal !!!"));
+
+        if (scored) {
+            if (isHome) homePenaltyScore++; else awayPenaltyScore++;
+        }
+        record(120, "120", scored ? EventType.PENALTY_SCORED : EventType.PENALTY_MISSED,
+                team, kicker, null, homePenaltyScore, awayPenaltyScore);
         return scored;
     }
 
     private void penalty() {
-        for(int kick=1;kick<=10;kick++){
-            boolean homeTurn = (kick%2==1);
-            int teamKickIndex = (kick - 1) / 2;
-            if(takeKick(homeTurn ? homeTeam : awayTeam, teamKickIndex)){
-                if(homeTurn){
-                    homePenaltyScore++;
-                }else{
-                    awayPenaltyScore++;
-                }
-            }
-            if(shootoutDecided(kick)){
+        record(120, "120", EventType.PENALTY_SHOOTOUT_START, null, null, null, 0, 0);
+        for (int kick = 1; kick <= 10; kick++) {
+            boolean homeTurn = (kick % 2 == 1);
+            takeKick(homeTurn, (kick - 1) / 2);
+            if (shootoutDecided(kick)) {
                 break;
             }
         }
+    }
 
-
+    public Team suddenDeath() {
+        int round = 5;
+        while (true) {
+            boolean h = takeKick(true, round);
+            boolean a = takeKick(false, round);
+            if (h != a) {
+                return h ? homeTeam : awayTeam;
+            }
+            round++;
+        }
     }
 
     private boolean shootoutDecided(int kick) {
@@ -266,18 +317,6 @@ public class MatchEngine {
         int awayLeft = 5 - kick / 2;
         return homePenaltyScore > awayPenaltyScore + awayLeft
                 || awayPenaltyScore > homePenaltyScore + homeLeft;
-    }
-
-    public Team suddenDeath() {
-        int round = 5;
-        while (true) {
-            boolean homeScore = takeKick(homeTeam, round);
-            boolean awayScore = takeKick(awayTeam, round);
-            if(homeScore != awayScore){
-                return homeScore ? homeTeam : awayTeam;
-            }
-            round++;
-        }
     }
 
     public void playKnockOut(){
@@ -313,5 +352,8 @@ public class MatchEngine {
     }
     public int getAwayOnTarget() {
         return awayOnTarget;
+    }
+    public List<MatchEvent> getMatchEvents() {
+        return matchEvents;
     }
 }
