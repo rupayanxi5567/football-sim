@@ -123,4 +123,29 @@ public class Team {
     public void addPlayer(Player p) {
         squad.add(p);
     }
+
+    public int getGoalKeeperRating(){
+        List<Player> gk = best(Position::isGoalkeeper,1);
+        return gk.isEmpty() ? 0 : gk.getFirst().getOverall();
+    }
+
+    public int getAverageStamina(){
+        List<Player> xi = getStartingEleven();
+        if(xi.isEmpty()){
+            return 0;
+        }
+        int sum = 0;
+        for(Player p:xi){
+            sum = sum+p.getStamina();
+        }
+        return sum/xi.size();
+    }
+
+    public List<Player> getPenaltyTakers(){
+        List<Player> takers = new ArrayList<>(getStartingEleven());
+        takers.removeIf(p -> p.getPosition().isGoalkeeper());
+        takers.sort((a,b) -> b.getShooting() - a.getShooting());
+        return takers;
+    }
+
 }
