@@ -9,17 +9,17 @@ public class DbTest {
     public static void main(String[] args) throws Exception {
         TeamRepository repo = new MySqlTeamRepository();
 
-        Team madrid = repo.loadClub("Real Madrid");
-        Team fcb = repo.loadClub("FC Barcelona");
+        Team por = repo.loadNationalTeam("Portugal");
+        Team arg = repo.loadNationalTeam("Argentina");
 
-        System.out.println("Squad size: " + madrid.getSquad().size() + " / " + fcb.getSquad().size());
+        System.out.println("Squad size: " + por.getSquad().size() + " / " + arg.getSquad().size());
         System.out.println();
-        System.out.println(madrid.getLineupText());
+        System.out.println(por.getLineupText());
         System.out.println();
-        System.out.println(fcb.getLineupText());
+        System.out.println(arg.getLineupText());
         System.out.println();
 
-        MatchEngine m = new MatchEngine(madrid, fcb, new Random(42));
+        MatchEngine m = new MatchEngine(por, arg, new Random(892));
         m.playKnockOut();
         System.out.println("Final: " + m.getHomeGoals() + "-" + m.getAwayGoals());
     }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 public class MatchEngine {
-    private static final double SHOT_RATE = 0.27;
+    private static final double SHOT_RATE = 0.32;
     private static final double EXTRA_TIME_FACTOR = 0.92;
     private static final double POSSESSION_RESET_CHANCE = 0.30;
     private static final double BASE_ON_TARGET = 0.35;

@@ -12,6 +12,10 @@ public class League {
     private final Random rng;
 
     public League(List<Team> teams, Random rng) {
+        this(teams, rng, true);
+    }
+
+    private League(List<Team> teams, Random rng, boolean generate) {
         if (teams.size() % 2 == 1) {
             throw new IllegalArgumentException("Even number of teams needed");
         }
@@ -20,7 +24,21 @@ public class League {
         for (Team t : teams) {
             table.put(t.getName(), new TableEntry(t.getName()));
         }
-        generateFixtures();
+        if (generate) {
+            generateFixtures();
+        }
+    }
+
+    // সেভ করা ফিক্সচার থেকে লিগ ফিরিয়ে আনে; পয়েন্ট টেবিল ফল থেকে আবার হিসাব হয়
+    public static League restore(List<Team> teams, List<Fixture> savedFixtures, Random rng) {
+        League league = new League(teams, rng, false);
+        for (Fixture f : savedFixtures) {
+            league.fixtures.add(f);
+            if (f.isPlayed()) {
+                league.record(f);
+            }
+        }
+        return league;
     }
 
     private void generateFixtures() {
@@ -42,6 +60,11 @@ public class League {
         }
     }
 
+    private void record(Fixture f) {
+        table.get(f.getHome().getName()).record(f.getHomeGoals(), f.getAwayGoals());
+        table.get(f.getAway().getName()).record(f.getAwayGoals(), f.getHomeGoals());
+    }
+
     public void playRound(int round) {
         for (Fixture f : fixtures) {
             if (f.getRound() != round || f.isPlayed()) {
@@ -51,8 +74,7 @@ public class League {
             m.setVerbose(false);
             m.play();
             f.setResult(m.getHomeGoals(), m.getAwayGoals());
-            table.get(f.getHome().getName()).record(f.getHomeGoals(), f.getAwayGoals());
-            table.get(f.getAway().getName()).record(f.getAwayGoals(), f.getHomeGoals());
+            record(f);
         }
     }
 
@@ -64,6 +86,10 @@ public class League {
 
     public int getTotalRounds() {
         return 2 * (teams.size() - 1);
+    }
+
+    public List<Team> getTeams() {
+        return Collections.unmodifiableList(teams);
     }
 
     public List<Fixture> getFixtures() {
