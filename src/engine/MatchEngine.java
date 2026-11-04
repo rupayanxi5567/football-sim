@@ -8,21 +8,25 @@ import java.util.List;
 import java.util.Random;
 
 public class MatchEngine {
-    private static final double SHOT_RATE = 0.32;
+    private static final double POSSESSION_POWER = 2.0;
+    private static final double SHOT_STRENGTH_POWER = 1.0;
+    private static final double MAX_SHOT_RATE = 0.50;
+    private static final double RATING_DIVISOR = 400.0;
+    private static final double GK_DIVISOR = 400.0;
+    private static final double MIN_ON_TARGET = 0.10;
+    private static final double MAX_ON_TARGET = 0.65;
+
+    private static final double SHOT_RATE = 0.30;
     private static final double EXTRA_TIME_FACTOR = 0.92;
     private static final double POSSESSION_RESET_CHANCE = 0.30;
     private static final double BASE_ON_TARGET = 0.35;
-    private static final double MIN_ON_TARGET = 0.15;
-    private static final double MAX_ON_TARGET = 0.60;
     private static final double BASE_SAVE = 0.73;
-    private static final double GK_DIVISOR = 300.0;
     private static final double MIN_SAVE = 0.40;
     private static final double MAX_SAVE = 0.85;
     private static final double FATIGUE_STRENGTH = 0.75;
     private static final double PENALTY_BASE = 0.75;
     private static final double PENALTY_DIVISOR = 400.0;
-    private static final double HOME_ADVANTAGE = 0.04;
-    private static final double RATING_DIVISOR = 400.0;
+    private static final double HOME_ADVANTAGE = 0.07;
     private static final double SHOOTER_POWER = 3.0;
     private static final double SHOOTER_DIVISOR = 150.0;
     private static final double ASSIST_CHANCE = 0.75;
@@ -111,7 +115,9 @@ public class MatchEngine {
         double awayMidNow = awayMid * fatigue(awayStamina, minute);
 
         if (POSSESSION_RESET_CHANCE > rand.nextDouble()) {
-            homeHasBall = rand.nextDouble() < (homeMidNow / (homeMidNow + awayMidNow));
+            double h = Math.pow(homeMidNow, POSSESSION_POWER);
+            double a = Math.pow(awayMidNow, POSSESSION_POWER);
+            homeHasBall = rand.nextDouble() < h / (h + a);
         }
 
         if (homeHasBall) {
@@ -124,14 +130,17 @@ public class MatchEngine {
         double attackFatigue = fatigue(homeHasBall ? homeStamina : awayStamina, minute);
         double defendFatigue = fatigue(homeHasBall ? awayStamina : homeStamina, minute);
 
+        double attackerPower = (homeHasBall ? homeAttack + homeMid : awayAttack + awayMid) * attackFatigue;
+        double defenderPower = (homeHasBall ? awayMid + awayDef : homeMid + homeDef) * defendFatigue;
+
         double shotRate = (minute > 90) ? SHOT_RATE * EXTRA_TIME_FACTOR : SHOT_RATE;
         shotRate = shotRate * attackFatigue;
+        shotRate = shotRate * Math.pow(attackerPower / defenderPower, SHOT_STRENGTH_POWER);
+        shotRate = Math.min(shotRate, MAX_SHOT_RATE);
         if (rand.nextDouble() > shotRate) {
             return;
         }
 
-        double attackerPower = (homeHasBall ? homeAttack + homeMid : awayAttack + awayMid) * attackFatigue;
-        double defenderPower = (homeHasBall ? awayMid + awayDef : homeMid + homeDef) * defendFatigue;
         int keeper = homeHasBall ? awayGk : homeGk;
 
         if (homeHasBall) {
