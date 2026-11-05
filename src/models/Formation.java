@@ -6,7 +6,7 @@ import static models.Position.*;
 
 public class Formation {
     private final String label;
-    private final List<Position> slots;     // গোলকিপার বাদে ১০টা স্লট
+    private final List<Position> slots;
 
     public Formation(String label, Position... slots) {
         if (slots.length != 10) {

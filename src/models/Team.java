@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 public class Team {
 
-    // একাদশের একটা স্লট: কোন পজিশনে কে খেলছে (পরে GUI-তেও লাগবে)
+
     public record LineupSlot(Position slot, Player player) {
         public int penalty() {
             return player.getPosition().penaltyFor(slot);
@@ -21,13 +21,13 @@ public class Team {
     private final String name;
     private final List<Player> squad = new ArrayList<>();
     private Formation formation = Formation.F_4213;
-    private List<LineupSlot> cachedLineup;      // বারবার হিসাব না করতে
+    private List<LineupSlot> cachedLineup;
 
     public Team(String name) {
         this.name = name;
     }
 
-    // ---------- লাইনআপ বাছাই ----------
+
 
     public List<LineupSlot> getLineup() {
         if (cachedLineup == null) {
@@ -36,20 +36,20 @@ public class Team {
         return cachedLineup;
     }
 
-    // খেলোয়াড়ের রেটিং বদলালে এটা ডাকো, নইলে পুরনো লাইনআপ থেকে যাবে
+
     public void refreshLineup() {
         cachedLineup = null;
     }
 
     private List<LineupSlot> buildLineup() {
         List<Position> slots = new ArrayList<>();
-        slots.add(Position.GK);                    // প্রথম স্লট সবসময় গোলকিপার
+        slots.add(Position.GK);
         slots.addAll(formation.getSlots());
 
         Player[] chosen = new Player[slots.size()];
         List<Player> used = new ArrayList<>();
 
-        // প্রতি ধাপে সব খালি স্লট × সব বাকি খেলোয়াড়ের মধ্যে সবচেয়ে বেশি স্কোরের জোড়াটা বসাও
+
         for (int round = 0; round < slots.size(); round++) {
             int bestSlot = -1;
             Player bestPlayer = null;
@@ -67,7 +67,7 @@ public class Team {
                     }
                 }
             }
-            if (bestPlayer == null) break;         // স্কোয়াডে লোক কম
+            if (bestPlayer == null) break;
             chosen[bestSlot] = bestPlayer;
             used.add(bestPlayer);
         }
@@ -89,7 +89,7 @@ public class Team {
         return xi;
     }
 
-    // ---------- দলের শক্তি (স্লট অনুযায়ী, ভুল পজিশনের শাস্তিসহ) ----------
+
 
     private int groupAverage(Predicate<Position> slotFilter) {
         int sum = 0, count = 0;
@@ -138,7 +138,7 @@ public class Team {
         return takers;
     }
 
-    // ---------- টেস্টের র‍্যান্ডম দল ----------
+
 
     public static Team random(String name, int level) {
         Team t = new Team(name);
@@ -159,13 +159,15 @@ public class Team {
 
     public String getLineupText() {
         StringBuilder sb = new StringBuilder();
-        sb.append(name).append(" | ").append(formation.getLabel()).append("\n");
+        sb.append(name).append(" | ").append(formation.getLabel()).append("
+");
         for (LineupSlot ls : getLineup()) {
             sb.append(String.format("  %-4s %s", ls.slot(), ls.player()));
             if (ls.penalty() > 0) {
                 sb.append("  (out of position, -").append(ls.penalty()).append(")");
             }
-            sb.append("\n");
+            sb.append("
+");
         }
         sb.append("ATT ").append(getAttack())
                 .append("  MID ").append(getMidField())

@@ -20,7 +20,7 @@ public class LeagueRepository {
 
     public int save(String saveName, long seed, League league) throws SQLException {
         try (Connection c = Db.getConnection()) {
-            c.setAutoCommit(false);          // সব লেখা একসঙ্গে সফল হবে, নইলে কিছুই না
+            c.setAutoCommit(false);
             try {
                 Map<String, Integer> ids = clubIds(c, league.getTeams());
                 int saveId = insertSave(c, saveName, seed);

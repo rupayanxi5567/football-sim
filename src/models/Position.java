@@ -33,13 +33,13 @@ public enum Position {
             case CMF: return 0.35;
             case DMF: return 0.2;
             case GK: return 0.0;
-            default: return 0.1;     // ডিফেন্ডার
+            default: return 0.1;
         }
     }
 
-    // ---------- নতুন: ভুল পজিশনে খেললে শাস্তি ----------
 
-    // মাঠের কোন "সারি"-তে এই পজিশন (০ = রক্ষণ, ৩ = আক্রমণ)
+
+
     private int line() {
         if (isDefender()) return 0;
         if (isAttackingMidFielder()) return 2;
@@ -51,7 +51,7 @@ public enum Position {
         return (a == x && b == y) || (a == y && b == x);
     }
 
-    // খুব কাছাকাছি পজিশনের জোড়া (প্রায় একই কাজ)
+
     private static boolean close(Position a, Position b) {
         return pair(a, b, LB, LWB) || pair(a, b, RB, RWB)
                 || pair(a, b, LWB, LMF) || pair(a, b, RWB, RMF)
@@ -59,12 +59,12 @@ public enum Position {
                 || pair(a, b, SS, CF) || pair(a, b, SS, AMF);
     }
 
-    // এই খেলোয়াড় (this) যদি slot পজিশনে খেলে, রেটিং থেকে কত পয়েন্ট কাটা যাবে
+
     public int penaltyFor(Position slot) {
         if (this == slot) return 0;
         if (this == GK || slot == GK) return 45;
         if (close(this, slot)) return 3;
-        if (pair(this, slot, LMF, LWF) || pair(this, slot, RMF, RWF)) return 7;   // মিডফিল্ডার উইংয়ে
+        if (pair(this, slot, LMF, LWF) || pair(this, slot, RMF, RWF)) return 7;
         int diff = Math.abs(this.line() - slot.line());
         return diff == 0 ? 6 : diff * 8;
     }

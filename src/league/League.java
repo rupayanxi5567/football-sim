@@ -29,7 +29,7 @@ public class League {
         }
     }
 
-    // সেভ করা ফিক্সচার থেকে লিগ ফিরিয়ে আনে; পয়েন্ট টেবিল ফল থেকে আবার হিসাব হয়
+
     public static League restore(List<Team> teams, List<Fixture> savedFixtures, Random rng) {
         League league = new League(teams, rng, false);
         for (Fixture f : savedFixtures) {

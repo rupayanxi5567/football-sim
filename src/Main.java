@@ -10,13 +10,13 @@ import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
-        // ৮টা দল, লেভেল ১-৫ এর মধ্যে ঘুরিয়ে
+
         List<Team> teams = new ArrayList<>();
         for (int i = 1; i <= 8; i++) {
             teams.add(Team.random("Team" + i, 1 + i % 5));
         }
 
-        // একই seed দিলে প্রতিবার হুবহু একই লিগ হবে
+
         League league = new League(teams, new Random(42));
         league.playAllRounds();
 
@@ -38,7 +38,7 @@ public class Main {
         }
     }
 
-    // চেকপয়েন্টগুলো যাচাই
+
     private static void runChecks(League league) {
         System.out.println();
         System.out.println("---- Checkpoints ----");

@@ -27,7 +27,7 @@ public class MonteCarloTest {
     }
 
     private static void run(Team home, Team away, int runs) {
-        Random rng = new Random(1);
+        Random rng = new Random(331);
         int hw = 0, d = 0, aw = 0;
         long hg = 0, ag = 0, hs = 0, as = 0;
         double hp = 0;

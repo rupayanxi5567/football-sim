@@ -16,7 +16,7 @@ public class SaveLoadTest {
         long seed = 428286;
         League league = new League(teamRepo.loadLeague("Premier League"), new Random(seed));
 
-        // অর্ধেক সিজন খেলে সেভ
+
         int half = league.getTotalRounds() / 2;
         for (int r = 1; r <= half; r++) {
             league.playRound(r);
@@ -24,13 +24,13 @@ public class SaveLoadTest {
         int saveId = leagueRepo.save("test-save", seed, league);
         System.out.println("Saved with id " + saveId);
 
-        // লোড করে মেলানো
+
         League loaded = leagueRepo.load(saveId);
         System.out.println("Fixtures loaded = " + loaded.getFixtures().size()
                 + (loaded.getFixtures().size() == league.getFixtures().size() ? "  OK" : "  WRONG"));
         System.out.println("Table identical after load = " + (sameTable(league, loaded) ? "OK" : "WRONG"));
 
-        // লোড করা লিগে বাকি অর্ধেক খেলা যায় কিনা
+
         for (int r = half + 1; r <= loaded.getTotalRounds(); r++) {
             loaded.playRound(r);
         }

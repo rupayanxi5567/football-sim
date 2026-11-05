@@ -9,15 +9,15 @@ import java.util.Random;
 
 public class Commentary {
 
-    // কমেন্ট্রির নিজস্ব Random: ইঞ্জিনের rand-এর সাথে মেশানো চলবে না,
-    // নইলে verbose চালু/বন্ধ করলে ম্যাচের ফলই বদলে যেত
+
+
     private static final Random RNG = new Random();
 
-    // প্রতিটা বাক্যের তালিকার জন্য শেষবার কোনটা বাছা হয়েছিল (পরপর একই বাক্য এড়াতে)
+
     private static final Map<String, Integer> LAST_PICK = new HashMap<>();
 
     // =====================================================================
-    //  বাক্যের ভাণ্ডার ({p} = খেলোয়াড়ের নাম, {t} = দলের নাম)
+
     // =====================================================================
 
 
@@ -95,7 +95,7 @@ public class Commentary {
             "{t} come out on top in the end."
     };
 
-    // ---- গোল ----
+
     private static final String[] GOAL_FWD = {
             "GOAL! {p} finds the net for {t}!",
             "GOOOAL! {p} makes no mistake from close range!",
@@ -142,7 +142,7 @@ public class Commentary {
             "The superstar delivers when it matters."
     };
 
-    // ---- গোলের সময়ের স্বাদ ----
+
     private static final String[] FLAVOR_EARLY = {
             "An early breakthrough!",
             "What a start to the game!",
@@ -177,7 +177,7 @@ public class Commentary {
             "That could be the decisive goal!"
     };
 
-    // ---- শট ----
+
     private static final String[] SAVED_ANY = {
             "{p} tests the keeper, but he gets down well to save.",
             "Good save! {p}'s effort is turned away.",
@@ -218,7 +218,7 @@ public class Commentary {
             "A hopeful long-range shot from {p} sails high and wide."
     };
 
-    // ---- ফাউল, কার্ড, ইনজুরি ----
+
     private static final String[] FOUL_ANY = {
             "Foul by {p}.",
             "{p} clatters into the back of an opponent. Free-kick.",
@@ -288,10 +288,10 @@ public class Commentary {
     };
 
     // =====================================================================
-    //  হেল্পার মেথড
+
     // =====================================================================
 
-    // তালিকা থেকে একটা বাক্য বাছো, কিন্তু আগেরবারের একই বাক্য পরপর নয়
+
     private static String pick(String key, String... options) {
         int idx = RNG.nextInt(options.length);
         Integer last = LAST_PICK.get(key);
@@ -309,7 +309,7 @@ public class Commentary {
         return out;
     }
 
-    // {p} আর {t} বসানো, নাম না থাকলে নিরাপদ বিকল্প
+
     private static String fill(String template, MatchEvent e) {
         String who = (e.getPlayer() != null) ? e.getPlayer().getName() : "a player";
         String team = (e.getTeam() != null) ? e.getTeam().getName() : "the team";
@@ -325,7 +325,7 @@ public class Commentary {
         return "  [Shoot-out: " + e.getHomeScore() + "-" + e.getAwayScore() + "]";
     }
 
-    // মিনিটের লেবেল। যোগ করা সময় ("45+2") দেখাতে চাইলে শুধু এই মেথড বদলালেই হবে
+
     private static String time(MatchEvent e) {
         String l = e.getLabel();
         return (l != null && !l.isEmpty() ? l : String.valueOf(e.getMinute())) + "' ";
@@ -345,7 +345,7 @@ public class Commentary {
         return e.getPlayer() != null && e.getPlayer().getOverall() >= 90;
     }
 
-    // গোলের মিনিট দেখে একটা অতিরিক্ত বাক্য (সবসময় নয়, ~৭০% ক্ষেত্রে)
+
     private static String timingFlavor(int minute) {
         if (RNG.nextInt(100) >= 70) return "";
         if (minute <= 5) return pick("flavor.early", FLAVOR_EARLY);
