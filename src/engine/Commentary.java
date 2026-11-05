@@ -393,7 +393,6 @@ public class Commentary {
 
     private static String foul(MatchEvent e) {
         String r = role(e);
-        // 6 no. todo
         String[] pool = r.equals("def") ? concat(FOUL_ANY, FOUL_DEF) : FOUL_ANY;
         return time(e) + fill(pick("foul." + r, pool), e);
     }

@@ -10,7 +10,7 @@ public class Formation {
 
     public Formation(String label, Position... slots) {
         if (slots.length != 10) {
-            throw new IllegalArgumentException(label + ": মাঠের খেলোয়াড় ঠিক ১০ জন লাগবে, আছে " + slots.length);
+            throw new IllegalArgumentException(label + ": Exactly 10 outfield players are required, got " + slots.length);
         }
         this.label = label;
         this.slots = List.of(slots);

@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 
 public class Team {
 
-
     public record LineupSlot(Position slot, Player player) {
         public int penalty() {
             return player.getPosition().penaltyFor(slot);
@@ -27,15 +26,12 @@ public class Team {
         this.name = name;
     }
 
-
-
     public List<LineupSlot> getLineup() {
         if (cachedLineup == null) {
             cachedLineup = buildLineup();
         }
         return cachedLineup;
     }
-
 
     public void refreshLineup() {
         cachedLineup = null;
@@ -48,7 +44,6 @@ public class Team {
 
         Player[] chosen = new Player[slots.size()];
         List<Player> used = new ArrayList<>();
-
 
         for (int round = 0; round < slots.size(); round++) {
             int bestSlot = -1;
@@ -88,8 +83,6 @@ public class Team {
         }
         return xi;
     }
-
-
 
     private int groupAverage(Predicate<Position> slotFilter) {
         int sum = 0, count = 0;
@@ -138,8 +131,6 @@ public class Team {
         return takers;
     }
 
-
-
     public static Team random(String name, int level) {
         Team t = new Team(name);
         Position[] layout = {
@@ -159,15 +150,13 @@ public class Team {
 
     public String getLineupText() {
         StringBuilder sb = new StringBuilder();
-        sb.append(name).append(" | ").append(formation.getLabel()).append("
-");
+        sb.append(name).append(" | ").append(formation.getLabel()).append(" \n");
         for (LineupSlot ls : getLineup()) {
             sb.append(String.format("  %-4s %s", ls.slot(), ls.player()));
             if (ls.penalty() > 0) {
                 sb.append("  (out of position, -").append(ls.penalty()).append(")");
             }
-            sb.append("
-");
+            sb.append("\n");
         }
         sb.append("ATT ").append(getAttack())
                 .append("  MID ").append(getMidField())

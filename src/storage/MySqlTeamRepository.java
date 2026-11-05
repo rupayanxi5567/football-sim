@@ -60,7 +60,7 @@ public class MySqlTeamRepository implements TeamRepository {
             }
         }
         if (teams.isEmpty()) {
-            throw new IllegalArgumentException("এই নামে কোনো লিগ নেই: " + leagueName);
+            throw new IllegalArgumentException("No league found with this name: " + leagueName);
         }
         return new ArrayList<>(teams.values());
     }

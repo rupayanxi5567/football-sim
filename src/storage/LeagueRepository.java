@@ -50,7 +50,7 @@ public class LeagueRepository {
             }
         }
         if (ids.size() != teams.size()) {
-            throw new IllegalStateException("কিছু ক্লাব ডেটাবেসে পাওয়া যায়নি");
+            throw new IllegalStateException("Some clubs were not found in the database");
         }
         return ids;
     }
@@ -133,7 +133,7 @@ public class LeagueRepository {
             ps.setInt(1, saveId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
-                    throw new IllegalArgumentException("এই id-র কোনো সেভ নেই: " + saveId);
+                    throw new IllegalArgumentException("No save found with this id: " + saveId);
                 }
                 return rs.getLong("seed");
             }

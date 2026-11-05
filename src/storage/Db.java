@@ -14,7 +14,7 @@ public class Db {
         try (FileInputStream in = new FileInputStream("db.properties")) {
             PROPS.load(in);
         } catch (IOException e) {
-            throw new IllegalStateException("db.properties পড়া যায়নি (প্রজেক্টের মূল ফোল্ডারে আছে তো?)", e);
+            throw new IllegalStateException("Could not read db.properties (Is it in the project root folder?)", e);
         }
     }
 
