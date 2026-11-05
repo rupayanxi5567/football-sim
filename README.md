@@ -9,6 +9,8 @@
 ![JDBC](https://img.shields.io/badge/data%20access-JDBC-informational)
 ![Status](https://img.shields.io/badge/status-v1%20%E2%80%A2%20Part%201%3A%20backend-success)
 
+<img width="1917" height="1020" alt="league-table" src="https://github.com/user-attachments/assets/da5f758a-fcbc-4d9c-bd68-142a38f4c35d" />
+
 *Pick any two clubs from 18,000+ real players, play 90 minutes with live commentary, or run a full 20-team league season and save it to MySQL.*
 
 </div>
@@ -97,33 +99,18 @@ My first version let the best team beat the worst one **96% of the time**. Inste
 
 *3,000 simulated matches per row, fixed seed. Total goals per match land between roughly 2.5 and 2.9.*
 
+<img width="1917" height="1016" alt="monte-carlo" src="https://github.com/user-attachments/assets/257c7233-8495-4aa0-a3ec-f9b2d1e94ff9" />
+
+
 ---
 
 ## 🖥️ Sample output
 
-```
-Real Madrid | 4-2-1-3
-  GK   T. Courtois (GK, OVR 82)
-  LB   F. Mendy (LB, OVR 78)
-  CB   Éder Militão (CB, OVR 80)
-  CB   D. Alaba (CB, OVR 79)
-  RB   T. Alexander-Arnold (RB, OVR 84)
-  DMF  F. Valverde (CMF, OVR 87)  (out of position, -3)
-  DMF  E. Camavinga (CMF, OVR 78)  (out of position, -3)
-  AMF  J. Bellingham (AMF, OVR 85)
-  LWF  Vini Jr. (LWF, OVR 86)
-  CF   K. Mbappé (CF, OVR 88)
-  RWF  Rodrygo (RWF, OVR 82)
-ATT 85  MID 81  DEF 80
-```
+<img width="1917" height="1017" alt="lineups" src="https://github.com/user-attachments/assets/25d23767-d452-4292-8df4-f69c8a2eef72" />
 
-```
-And we're off! The referee blows the whistle to start the game.
-5' The keeper stands tall and denies J. Bellingham!
-26' That one clipped the outside of the post. K. Mbappé can hardly believe it.
-90' E. Haaland finishes after a lovely pass from P. Foden! A huge goal at a crucial moment! (0-1)
-It's all over! The final whistle blows. Score: 0-1
-```
+<img width="1917" height="1010" alt="match-commentary-1" src="https://github.com/user-attachments/assets/3f2b38ea-1336-4837-9347-e2007a8dedf0" />
+
+<img width="1917" height="1005" alt="match-commentary-2" src="https://github.com/user-attachments/assets/8c70a196-71b7-44cf-ac9b-3dc5c6c264b7" />
 
 ---
 
@@ -139,12 +126,17 @@ erDiagram
     TEAMS ||--o{ FIXTURES : "home / away"
 ```
 
+<img width="1917" height="1020" alt="eer" src="https://github.com/user-attachments/assets/9ae656e3-c430-4d0d-98bc-9bfe166156ec" />
+
 Two kinds of data are kept apart on purpose:
 
 - **Master data** (`teams`, `players`): the real-world ratings. The game only reads it.
 - **Save-game data** (`saves`, `save_teams`, `fixtures`): what the game writes. There is **no stored points table**; it is recomputed from `fixtures`, so there is one source of truth.
 
 ### Import pipeline
+
+<img width="1917" height="1015" alt="players-table" src="https://github.com/user-attachments/assets/7f6dc171-c8a1-4fe7-80d1-3e5326ba15b5" />
+
 
 ```
 CSV  ->  raw_players (staging, all VARCHAR)  ->  v_players_mapped (VIEW)  ->  players
@@ -200,6 +192,8 @@ The dataset lists several positions per player; the first one is used.
 | `LeagueTest` | Loads a full league from MySQL, simulates the season, prints the table and checkpoints |
 | `SaveLoadTest` | Saves a half-played season, reloads it, and verifies the table is identical |
 | `MonteCarloTest` | Simulates the same fixtures thousands of times and prints win rates, goals and shots |
+
+<img width="1917" height="1005" alt="save-load" src="https://github.com/user-attachments/assets/a66e6e64-40a3-4836-b85b-7e1f0684c3ff" />
 
 ---
 
