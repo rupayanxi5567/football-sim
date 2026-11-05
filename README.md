@@ -255,4 +255,4 @@ football-sim/
 
 Player ratings come from a public EA FC 26 dataset. This is an independent educational project and is **not affiliated with or endorsed by EA**. The dataset is not redistributed here.
 
-Built by **Rupayan Dey** ([@your-username](https://github.com/your-username)). I used AI as a pair-programming partner; the design decisions, debugging and tuning were mine.
+Built by **Rupayan Dey** (rupayanxi5567 (https://github.com/rupayanxi5567)). I used AI as a pair-programming partner; the design decisions, debugging and tuning were mine.
